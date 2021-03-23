@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { setTokenSourceMapRange } from 'typescript';
 import { api } from '../services/api';
 import { Product, Stock } from '../types';
 
@@ -23,11 +24,11 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
-    // const storagedCart = Buscar dados do localStorage
+    const storagedCart = localStorage.getItem('@RocketShoes:cart');
 
-    // if (storagedCart) {
-    //   return JSON.parse(storagedCart);
-    // }
+    if (storagedCart) {
+      return JSON.parse(storagedCart);
+    }
 
     return [];
   });
@@ -40,27 +41,22 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       const addProductTocart = await api.get<Product>(`products/${productId}`)
         .then(response => response.data);
 
-      if(cart.some(product => product.id === productId)){
-        const productIndex = cart.findIndex(product => product.id === productId);
+      const productExist = cart.find(product => product.id === productId);
 
-        if(cart[productIndex].amount + 1 <= addProductToCartStock.amount){
-          return updateProductAmount({
-            productId,
-            amount: cart[productIndex].amount + 1
-          })
-        }
-        else{
-          toast.error('Quantidade solicitada indisponível!');
-        }        
+      if(!productExist && addProductToCartStock.amount > 0){
+        setCart([...cart, {...addProductTocart, amount: 1}]);
+
+        localStorage.setItem('@RocketShoes:cart', JSON.stringify(cart))
+      }
+      else if(productExist && productExist.amount + 1 <= addProductToCartStock.amount){
+        updateProductAmount({
+          productId,
+          amount: productExist.amount + 1
+        });
       }
       else{
-        setCart([...cart, {...addProductTocart, amount: 1}])
-
-        toast.done('Produto adicionado ao carrinho!');
-
-        return localStorage.setItem('@RocketShoes:cart', JSON.stringify(cart));
+        toast.error('Quantidade solicitada indisponível!');
       }
-           
     } catch {
       toast.error('Erro ao adicionar produto');
     }
@@ -79,9 +75,29 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+      const productStock = await api.get<Stock>(`stock/${productId}`)
+        .then(response => response.data);
+
+      if(amount < 1){
+        return;
+      }
+      else if(amount <= productStock.amount){
+        const updateProductCart = cart.map(product => 
+          product.id === productId
+            ? {...product, amount}
+            : product
+        )
+
+        setCart(updateProductCart);
+
+        localStorage.setItem('@RocketShoes:cart', JSON.stringify(updateProductCart));
+      }
+      else{
+        toast.error('Quantidade solicitada indisponível!');        
+      }
+
     } catch {
-      // TODO
+      toast.error('Erro ao adicionar produto');
     }
   };
 
