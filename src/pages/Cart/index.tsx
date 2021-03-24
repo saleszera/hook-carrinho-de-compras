@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router';
 import {
   MdDelete,
   MdAddCircleOutline,
   MdRemoveCircleOutline,
 } from 'react-icons/md';
+import Modal from 'react-modal';
+
 
 import { useCart } from '../../hooks/useCart';
 import { formatPrice } from '../../util/format';
+import { FinishCartModal } from '../../components/FinishCartModal';
 import { Container, ProductTable, Total } from './styles';
 
 interface Product {
@@ -17,8 +21,12 @@ interface Product {
   amount: number;
 }
 
+Modal.setAppElement('#root');
+
 const Cart = (): JSX.Element => {
+  const [isFinishCartModalOpen, setIsFinishCartModalOpen] = useState(false);
   const { cart, removeProduct, updateProductAmount } = useCart();
+  const history = useHistory();
 
   const cartFormatted = cart.map(product => ({
     ...product,
@@ -55,8 +63,25 @@ const Cart = (): JSX.Element => {
     removeProduct(productId);
   }
 
+
+  function handleFinishOrder(){
+    setIsFinishCartModalOpen(true);
+
+    setTimeout(() => {
+      setIsFinishCartModalOpen(false);
+      history.push('/');
+    }, 2000);    
+  }
+
   return (
     <Container>
+      <FinishCartModal 
+        isModalOpen={isFinishCartModalOpen}
+        onRequestClose={() => {
+          setIsFinishCartModalOpen(false)
+          history.push('/');
+        }}
+      />
       <ProductTable>
         <thead>
           <tr>
@@ -122,7 +147,7 @@ const Cart = (): JSX.Element => {
       </ProductTable>
 
       <footer>
-        <button type="button">Finalizar pedido</button>
+        <button type="button" onClick={handleFinishOrder}>Finalizar pedido</button>
 
         <Total>
           <span>TOTAL</span>
