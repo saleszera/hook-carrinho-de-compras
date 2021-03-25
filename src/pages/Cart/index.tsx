@@ -21,16 +21,16 @@ interface Product {
   amount: number;
 }
 
-// Modal.setAppElement('#root');
+Modal.setAppElement('#root');
 
 const Cart = (): JSX.Element => {
   const [isFinishCartModalOpen, setIsFinishCartModalOpen] = useState(false);
-  // const [isButtonActive, setIsButtonActive] = useState(true);
+  const [isButtonActive, setIsButtonActive] = useState(true);
   const { cart, removeProduct, updateProductAmount } = useCart();
 
   const history = useHistory();
 
-  // useMemo(() => cart.length > 0 ? setIsButtonActive(false) : setIsButtonActive(true), [cart])  
+  useMemo(() => cart.length > 0 ? setIsButtonActive(false) : setIsButtonActive(true), [cart])  
 
   const cartFormatted = cart.map(product => ({
     ...product,
@@ -156,8 +156,7 @@ const Cart = (): JSX.Element => {
       </ProductTable>
 
       <footer>
-        {/* <button type="button" disabled={isButtonActive} onClick={handleFinishOrder}>Finalizar pedido</button> */}
-        <button type="button" onClick={handleFinishOrder}>Finalizar pedido</button>
+        <button type="button" disabled={isButtonActive} onClick={handleFinishOrder}>Finalizar pedido</button>     
 
         <Total>
           <span>TOTAL</span>
