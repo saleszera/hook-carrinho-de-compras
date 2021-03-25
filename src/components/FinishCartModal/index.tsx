@@ -17,7 +17,7 @@ export function FinishCartModal({isModalOpen, onRequestClose}: FinishCartModalPr
       className="react-modal-content"
     >
       <Container>
-        <FiThumbsUp size={60} color='#FFFF'/>
+        <FiThumbsUp size={150} color='#FFFF'/>
       </Container>
 
     </Modal>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 import {
   MdDelete,
@@ -21,12 +21,16 @@ interface Product {
   amount: number;
 }
 
-Modal.setAppElement('#root');
+// Modal.setAppElement('#root');
 
 const Cart = (): JSX.Element => {
   const [isFinishCartModalOpen, setIsFinishCartModalOpen] = useState(false);
+  // const [isButtonActive, setIsButtonActive] = useState(true);
   const { cart, removeProduct, updateProductAmount } = useCart();
+
   const history = useHistory();
+
+  // useMemo(() => cart.length > 0 ? setIsButtonActive(false) : setIsButtonActive(true), [cart])  
 
   const cartFormatted = cart.map(product => ({
     ...product,
@@ -64,11 +68,16 @@ const Cart = (): JSX.Element => {
   }
 
 
-  function handleFinishOrder(){
+  function handleFinishOrder(){  
+    if(!cart.length){
+      return;
+    }
+    
     setIsFinishCartModalOpen(true);
 
     setTimeout(() => {
       setIsFinishCartModalOpen(false);
+      localStorage.removeItem('@RocketShoes:cart');
       history.push('/');
     }, 2000);    
   }
@@ -147,6 +156,7 @@ const Cart = (): JSX.Element => {
       </ProductTable>
 
       <footer>
+        {/* <button type="button" disabled={isButtonActive} onClick={handleFinishOrder}>Finalizar pedido</button> */}
         <button type="button" onClick={handleFinishOrder}>Finalizar pedido</button>
 
         <Total>
